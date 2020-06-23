@@ -11,6 +11,7 @@
 #define SECS_PER_MIN ((time_t)(60UL))
 #define SECS_PER_HOUR ((time_t)(3600UL))
 #define SECS_PER_DAY ((time_t)(SECS_PER_HOUR * 24UL))
+#define SECS_PER_YEAR ((time_t)(SECS_PER_DAY * 365UL)) // TODO: ought to handle leap years
 #define tmYearToCalendar(Y) ((Y) + 1970) // full four digit year
 
 // This ugly hack allows us to define C++ overloaded functions, when included
@@ -50,6 +51,13 @@ uint8_t  to_day(time_t t);     // the day for the given time (0-6)
 uint8_t  to_month(time_t t);   // the month for the given time
 uint8_t  to_weekday(time_t t); // weekday, sunday is day 1
 uint16_t to_year(time_t t);    // the year for the given time
+
+/* date strings */
+#define dt_MAX_STRING_LEN 9 // length of longest date string (excluding terminating null)
+char* monthStr(uint8_t month);
+char* dayStr(uint8_t day);
+char* monthShortStr(uint8_t month);
+char* dayShortStr(uint8_t day);
 
 }
 #endif

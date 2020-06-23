@@ -8,6 +8,7 @@
  */
 
 #include "MyESP.h"
+#include "TimeLib.h"
 
 // web files
 // reference libs
@@ -2749,6 +2750,16 @@ void MyESP::_printScanResult(int networksFound) {
     _ws->textAll(buffer, len);
 }
 
+void _static_file_headers(AsyncWebServerResponse * response) {
+
+  char s[128];
+  unsigned long expires = now() + SECS_PER_YEAR;
+  sprintf(s, "%s, ", dayShortStr(to_weekday(expires))); // two printfs because ShortStr functions share the buffer
+  sprintf(s + strlen(s), "%d %s %d 00:00:00 GMT", to_day(expires), monthShortStr(to_month(expires)), to_year(expires));
+  response->addHeader("Expires", s);
+  response->addHeader("Content-Encoding", "gzip");
+}
+
 // set up web server
 void MyESP::_webserver_setup() {
     _ws->onEvent(std::bind(&MyESP::_onWsEvent,
@@ -2813,34 +2824,34 @@ void MyESP::_webserver_setup() {
     _webServer->on("/fonts/glyphicons-halflings-regular.woff", HTTP_GET, [](AsyncWebServerRequest * request) {
         AsyncWebServerResponse * response =
             request->beginResponse_P(200, "font/woff", glyphicons_halflings_regular_woff_gz, glyphicons_halflings_regular_woff_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
+        _static_file_headers(response);
         request->send(response);
     });
     _webServer->on("/css/required.css", HTTP_GET, [](AsyncWebServerRequest * request) {
         AsyncWebServerResponse * response = request->beginResponse_P(200, "text/css", required_css_gz, required_css_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
+        _static_file_headers(response);
         request->send(response);
     });
     _webServer->on("/js/required.js", HTTP_GET, [](AsyncWebServerRequest * request) {
         AsyncWebServerResponse * response = request->beginResponse_P(200, "text/javascript", required_js_gz, required_js_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
+        _static_file_headers(response);
         request->send(response);
     });
     _webServer->on("/js/myesp.js", HTTP_GET, [](AsyncWebServerRequest * request) {
         AsyncWebServerResponse * response = request->beginResponse_P(200, "text/javascript", myesp_js_gz, myesp_js_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
+        _static_file_headers(response);
         request->send(response);
     });
 
     _webServer->on("/index.html", HTTP_GET, [](AsyncWebServerRequest * request) {
         AsyncWebServerResponse * response = request->beginResponse_P(200, "text/html", index_html_gz, index_html_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
+        _static_file_headers(response);
         request->send(response);
     });
 
     _webServer->on("/myesp.html", HTTP_GET, [](AsyncWebServerRequest * request) {
         AsyncWebServerResponse * response = request->beginResponse_P(200, "text/html", myesp_html_gz, myesp_html_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
+        _static_file_headers(response);
         request->send(response);
     });
 
