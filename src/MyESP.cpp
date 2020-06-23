@@ -9,6 +9,17 @@
 
 #include "MyESP.h"
 
+// web files
+// reference libs
+#include "webh/glyphicons-halflings-regular.woff.gz.h"
+#include "webh/required.css.gz.h"
+#include "webh/required.js.gz.h"
+
+// custom stuff
+#include "webh/index.html.gz.h"
+#include "webh/myesp.html.gz.h"
+#include "webh/myesp.js.gz.h"
+
 #ifdef CRASH
 EEPROM_Rotate EEPROMr;
 #endif
@@ -37,6 +48,8 @@ static char * _general_password = nullptr;
 static bool   _shouldRestart    = false;
 
 static char _debug_buffer[TELNET_MAX_BUFFER_LENGTH];
+
+static uuid::syslog::SyslogService syslog;
 
 uint8_t RtcmemSize = (sizeof(RtcmemData) / 4u);
 auto    Rtcmem     = reinterpret_cast<volatile RtcmemData *>(RTCMEM_ADDR);

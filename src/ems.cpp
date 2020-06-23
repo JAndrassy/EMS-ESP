@@ -23,7 +23,6 @@ _EMS_Sys_Status                                            EMS_Sys_Status; // EM
 CircularBuffer<_EMS_TxTelegram, EMS_TX_TELEGRAM_QUEUE_MAX> EMS_TxQueue;    // FIFO queue for Tx send buffer
 std::list<_Detected_Device>                                Devices;        // for storing all detected EMS devices
 
-uint8_t _EMS_Devices_max       = ArraySize(EMS_Devices);
 uint8_t _EMS_Devices_Types_max = ArraySize(EMS_Devices_Types);
 
 // these structs contain the data we store from the specific EMS devices

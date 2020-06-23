@@ -23,7 +23,6 @@
 #include <uuid/common.h>
 #include <uuid/log.h>
 #include <uuid/syslog.h>
-static uuid::syslog::SyslogService syslog;
 enum MYESP_SYSLOG_LEVEL : uint8_t { MYESP_SYSLOG_INFO, MYESP_SYSLOG_ERROR };
 
 // local libraries
@@ -48,17 +47,6 @@ extern struct rst_info resetInfo;
 #include <ESPAsyncTCP.h>
 #define OTA_PORT 8266
 #endif
-
-// web files
-// reference libs
-#include "webh/glyphicons-halflings-regular.woff.gz.h"
-#include "webh/required.css.gz.h"
-#include "webh/required.js.gz.h"
-
-// custom stuff
-#include "webh/index.html.gz.h"
-#include "webh/myesp.html.gz.h"
-#include "webh/myesp.js.gz.h"
 
 #define MYESP_CONFIG_FILE "/myesp.json"
 #define MYESP_CUSTOMCONFIG_FILE "/customconfig.json"
