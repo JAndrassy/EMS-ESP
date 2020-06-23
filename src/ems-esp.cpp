@@ -15,6 +15,7 @@
 #include "emsuart.h"
 #include "my_config.h"
 #include "version.h"
+#include "blynk.h"
 
 // Dallas external temp sensors
 #include "ds18.h"
@@ -85,6 +86,7 @@ typedef struct {
     uint8_t bus_id;            // BUS ID, defaults to 0x0B for the service key
     uint8_t master_thermostat; // Product ID of master thermostat to use, 0 for automatic
     char *  known_devices;     // list of known deviceIDs for quick boot
+    char *  blynk_auth_key;    // blynk app auth key
 } _EMSESP_Settings;
 
 typedef struct {
@@ -1368,6 +1370,8 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
 
         EMSESP_Settings.known_devices = strdup(settings["known_devices"] | "");
 
+        EMSESP_Settings.blynk_auth_key = strdup(settings["blynk_auth_key"] | "");
+
         return true;
     }
 
@@ -1384,6 +1388,7 @@ bool LoadSaveCallback(MYESP_FSACTION_t action, JsonObject settings) {
         settings["bus_id"]            = EMSESP_Settings.bus_id;
         settings["master_thermostat"] = EMSESP_Settings.master_thermostat;
         settings["known_devices"]     = EMSESP_Settings.known_devices;
+        settings["blynk_auth_key"]    = EMSESP_Settings.blynk_auth_key;
 
         return true;
     }
@@ -1494,6 +1499,22 @@ MYESP_FSACTION_t SetListCallback(MYESP_FSACTION_t action, uint8_t wc, const char
                 EMSESP_Settings.publish_time = 0;
             } else {
                 EMSESP_Settings.publish_time = atoi(value);
+            }
+            ok = MYESP_FSACTION_RESTART;
+        }
+
+        // blynk_auth_key
+        if (strcmp(setting, "blynk_auth_key") == 0) {
+            if (wc == 1) {
+              if (strlen(EMSESP_Settings.blynk_auth_key) > 0) {
+                free(EMSESP_Settings.blynk_auth_key);
+                EMSESP_Settings.blynk_auth_key = strdup("");
+              }
+            } else {
+              if (strcmp(EMSESP_Settings.blynk_auth_key, value) != 0) {
+                free(EMSESP_Settings.blynk_auth_key);
+                EMSESP_Settings.blynk_auth_key = strdup(value);
+              }
             }
             ok = MYESP_FSACTION_RESTART;
         }
@@ -2299,7 +2320,7 @@ void WebCallback(JsonObject root) {
                 emsbus["ok"]  = true;
                 emsbus["msg"] = "EMS Bus Connected with both Rx and Tx active.";
             } else {
-                emsbus["ok"]  = false;
+                emsbus["ok"]  = true;
                 emsbus["msg"] = "EMS Bus Connected but Tx is not working.";
             }
         } else {
@@ -2482,6 +2503,7 @@ void initEMSESP() {
     EMSESP_Settings.bus_id            = EMS_BUSID_DEFAULT;  // Service Key is default
     EMSESP_Settings.master_thermostat = 0;
     EMSESP_Settings.known_devices     = strdup("");
+    EMSESP_Settings.blynk_auth_key    = strdup("");
 
     // shower settings
     EMSESP_Shower.timerStart    = 0;
@@ -2654,6 +2676,10 @@ void setup() {
     // check for Dallas sensors
     ds18.setup(EMSESP_Settings.dallas_gpio, EMSESP_Settings.dallas_parasite);
     scanDallas();
+
+    if (strlen(EMSESP_Settings.blynk_auth_key) > 0) {
+      blynkSetup(EMSESP_Settings.blynk_auth_key);
+    }
 }
 
 //
@@ -2661,6 +2687,7 @@ void setup() {
 //
 void loop() {
     myESP.loop(); // handle telnet, mqtt, wifi etc
+    blynkLoop();
 
     // get Dallas Sensor readings every 2 seconds
     static uint32_t last_check = 0;

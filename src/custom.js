@@ -9,7 +9,8 @@ var custom_config = {
         "shower_timer": false,
         "shower_alert": false,
         "publish_time": 10,
-        "tx_mode": 1
+        "tx_mode": 1,
+        "blynk_auth_key": ""
     }
 };
 
@@ -19,6 +20,7 @@ function listcustom() {
     document.getElementById("dallas_gpio").value = custom_config.settings.dallas_gpio;
     document.getElementById("publish_time").value = custom_config.settings.publish_time;
     document.getElementById("tx_mode").value = custom_config.settings.tx_mode;
+    document.getElementById("blynk_auth_key").value = custom_config.settings.blynk_auth_key;
 
     if (custom_config.settings.led) {
         $("input[name=\"led\"][value=\"1\"]").prop("checked", true);
@@ -72,6 +74,7 @@ function savecustom() {
 
     custom_config.settings.publish_time = parseInt(document.getElementById("publish_time").value);
     custom_config.settings.tx_mode = parseInt(document.getElementById("tx_mode").value);
+    custom_config.settings.blynk_auth_key = document.getElementById("blynk_auth_key").value;
 
     custom_saveconfig();
 }

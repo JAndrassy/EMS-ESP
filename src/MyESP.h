@@ -283,6 +283,7 @@ class MyESP {
     void setTelnet(telnetcommand_callback_f callback_cmd, telnet_callback_f callback);
     bool getUseSerial();
     void setUseSerial(bool toggle);
+    Stream& getDebugStream() {return SerialAndTelnet;}
 
     // syslog
     void writeLogEvent(const uint8_t type, const char * msg);
