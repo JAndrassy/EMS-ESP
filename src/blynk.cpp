@@ -1,4 +1,6 @@
 #include "MyESP.h"
+#define BLYNK_TEMPLATE_ID "TMPLl0hKFgR-"
+#define BLYNK_DEVICE_NAME "EMS ESP"
 #define BLYNK_PRINT myESP.getDebugStream()
 #define BLYNK_NO_BUILTIN // Blynk doesn't handle pins
 #include <BlynkSimpleEsp8266.h>
@@ -22,15 +24,14 @@ const unsigned long PUSH_SHORT_INTERVAL = 60000; // 1 minute
 
 bool initialized = false;
 unsigned long previousMillis = 0;
-unsigned long nextInterval = PUSH_LONG_INTERVAL;
-bool oneMoreShortInterval;
+unsigned long lastHeatingActiveMillis = 0;
 
 BLYNK_WRITE(WW_ONETIME_BUTTON) {
   ems_setWarmWaterOnetime(param.asInt());
 }
 
 void blynkSetup(const char* authKey) {
-  Blynk.config(authKey, BLYNK_DEFAULT_DOMAIN, BLYNK_DEFAULT_PORT);
+  Blynk.config(authKey);
   initialized = true;
 }
 
@@ -40,11 +41,14 @@ void blynkLoop() {
 
   unsigned long currentMillis = millis();
 
-  unsigned long interval = (EMS_Boiler.heatingActive || oneMoreShortInterval) ? PUSH_SHORT_INTERVAL : nextInterval;
+  if (EMS_Boiler.heatingActive) {
+    lastHeatingActiveMillis = currentMillis;
+  }
+
+  unsigned long interval = (currentMillis - lastHeatingActiveMillis < PUSH_LONG_INTERVAL) ? PUSH_SHORT_INTERVAL : PUSH_LONG_INTERVAL;
 
   if (currentMillis - previousMillis >= interval || !previousMillis) {
     previousMillis = currentMillis;
-    oneMoreShortInterval = EMS_Boiler.heatingActive;
 
     Blynk.virtualWrite(BOILER_TEMP_WIDGET, (float) EMS_Boiler.boilTemp / 10.0);
     Blynk.virtualWrite(SEL_FLOW_TEMP_WIDGET, EMS_Boiler.selFlowTemp);
@@ -59,6 +63,5 @@ void blynkLoop() {
     Blynk.virtualWrite(ACTIVE_WIDGET, EMS_Boiler.heatingActive ? 0Xff: 0);
     Blynk.virtualWrite(WW_ONETIME_BUTTON, EMS_Boiler.wWOneTime);
   }
-  nextInterval = EMS_Boiler.heatingActive ? PUSH_SHORT_INTERVAL : PUSH_LONG_INTERVAL;
   Blynk.run();
 }
